@@ -10,41 +10,55 @@ function hex2a(hexx) {
     return str;
 }
 
+function matchRegex(string, regex, group = 0) {
+    var matches = [];
+    let m
+    while (m = regex.exec(string)) {
+        matches.push(m[group]);
+    }
+    return matches
+}
+
+function extractNumber(string, nth = 0) {
+    const regex = /(?:\d,)?\d{1,3}\.\d{2}/g ///^(?:\d{1,3}(?:,\d{3})*|\d+)(?:\.\d+)?/g
+    const matches = matchRegex(string, regex)
+    return parseFloat(matches[nth].replace(',', ''))
+}
+
+function parseBTETSnippet(snippet) {
+    const snippetData = {}
+    let currentOperatorStart = 0;
+    for (let i = 0; i <= snippet.length - 1; i++) {
+        let op = snippet.substr(i, 2)
+        if (operators.includes(op)) {
+            let value = snippet.slice(currentOperatorStart, i).trim()
+            if (op === "Tj") {
+                value = value.replace(/<|>/g, "")
+                value = hex2a(value).trim()
+                if (snippetData[op]) snippetData[op] = snippetData[op].concat(value)
+                else snippetData[op] = value
+
+            } else {
+                snippetData[op] = value
+
+            }
+            currentOperatorStart = i + 2
+        }
+    }
+    return snippetData
+}
+
 function parsePayslip(data) {
     const stream = data.match(/stream([\s\S]*?)endstream/)[1] // first element of match array contains stream and endstream
     let regex = /BT\s*([\s\S]*?)\s*ET/g
-    var matches = [];
-    let m
-    while (m = regex.exec(stream)) {
-        matches.push(m[1]);
-    }
-    const q = []
-    for (const match of matches) {
-        const l = {}
-        let currentOperatorStart = 0;
-        for (let i = 0; i <= match.length - 1; i++) {
-            let foundOperator = match.substr(i, 2)
-            if (operators.includes(foundOperator)) {
-                let value = match.slice(currentOperatorStart, i).trim()
-                if (foundOperator === "Tj") {
-                    value = value.replace(/<|>/g, "")
-                    value = hex2a(value).trim()
-                    console.log(l[foundOperator], value)
-                    if (l[foundOperator]) l[foundOperator].push(value)
-                    else l[foundOperator] = [value]
-
-                } else {
-                    l[foundOperator] = value
-
-                }
-                currentOperatorStart = i + 2
-            }
-        }
-        q.push(l)
+    const BTETSnippets = matchRegex(stream, regex, 1)
+    const payslipContent = []
+    for (const snippet of BTETSnippets) {
+        payslipContent.push(parseBTETSnippet(snippet))
 
     }
-
-    console.log(q)
+    console.log(payslipContent)
+    console.log(extractNumber(payslipContent[17].Tj), extractNumber(payslipContent[17].Tj, 2))
 }
 export default class Test extends React.Component {
     lol = (file) => {
