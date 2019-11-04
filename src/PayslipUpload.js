@@ -1,7 +1,7 @@
 import React from "react"
 import { Upload, Icon, message } from 'antd';
-const operators = ['Tj', 'Td', 'Tw', 'Tf']
 const { Dragger } = Upload;
+
 function hex2a(hexx) {
     var hex = hexx.toString();//force conversion
     var str = '';
@@ -26,6 +26,8 @@ function extractNumber(string, nth = 0) {
 }
 
 function parseBTETSnippet(snippet) {
+    const operators = ['Tj', 'Td', 'Tw', 'Tf']
+
     const snippetData = {}
     let currentOperatorStart = 0;
     for (let i = 0; i <= snippet.length - 1; i++) {

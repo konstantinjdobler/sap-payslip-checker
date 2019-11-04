@@ -1,8 +1,8 @@
 import React from 'react';
-import Test from './time_calculation/test'
+import PayslipUpload from './PayslipUpload';
 function App() {
   return (
-    <Test />
+    <PayslipUpload />
   );
 }
 
