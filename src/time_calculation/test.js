@@ -20,7 +20,7 @@ function matchRegex(string, regex, group = 0) {
 }
 
 function extractNumber(string, nth = 0) {
-    const regex = /(?:\d,)?\d{1,3}\.\d{2}/g ///^(?:\d{1,3}(?:,\d{3})*|\d+)(?:\.\d+)?/g
+    const regex = /(?:\d,)?\d{1,3}\.\d{2}/g
     const matches = matchRegex(string, regex)
     return parseFloat(matches[nth].replace(',', ''))
 }
@@ -60,12 +60,11 @@ function parsePayslip(data) {
     console.log(payslipContent)
     console.log(extractNumber(payslipContent[17].Tj), extractNumber(payslipContent[17].Tj, 2))
 }
-export default class Test extends React.Component {
-    lol = (file) => {
+export default class PayslipUpload extends React.Component {
+    beforeUpload = (file) => {
         const reader = new FileReader();
         reader.readAsText(file);
         reader.onload = () => {
-            //console.log(reader.result)
             message.success(`${file.name} file uploaded successfully.`);
             parsePayslip(reader.result)
 
@@ -73,14 +72,10 @@ export default class Test extends React.Component {
         return false
     }
     render() {
-        const props = {
-            name: 'file',
-            //action: 'https://www.mocky.io/v2/5cc8019d300000980a055e76',
-            beforeUpload: this.lol,
 
-        };
         return (<>
-            <Dragger {...props}>
+            <Dragger beforeUpload={this.beforeUpload}
+            >
                 <p className="ant-upload-drag-icon">
                     <Icon type="inbox" />
                 </p>
