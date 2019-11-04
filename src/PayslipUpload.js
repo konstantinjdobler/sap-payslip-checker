@@ -20,7 +20,7 @@ function matchRegex(string, regex, group = 0) {
 }
 
 function extractNumber(string, nth = 0) {
-    const regex = /(?:\d,)?\d{1,3}\.\d{2}/g
+    const regex = /(?:\d{1,3},)?\d{1,3}\.\d{2}/g
     const matches = matchRegex(string, regex)
     return parseFloat(matches[nth].replace(',', ''))
 }
@@ -49,18 +49,34 @@ function parseBTETSnippet(snippet) {
     }
     return snippetData
 }
+function extractPayslipData(BTETSnippets) {
+    const data = {}
+    for (const snippet of BTETSnippets) {
+        const parsedSnippet = parseBTETSnippet(snippet)
+        const snippetId = Math.floor(extractNumber(parsedSnippet.Td, 1))
+        data[snippetId] = parsedSnippet.Tj
+
+    }
+    return data
+}
 
 function parsePayslip(data) {
     const stream = data.match(/stream([\s\S]*?)endstream/)[1] // first element of match array contains stream and endstream
     let regex = /BT\s*([\s\S]*?)\s*ET/g
     const BTETSnippets = matchRegex(stream, regex, 1)
-    const payslipContent = []
-    for (const snippet of BTETSnippets) {
-        payslipContent.push(parseBTETSnippet(snippet))
+    const payslipData = extractPayslipData(BTETSnippets)
+    console.log(payslipData)
+    //console.log(extractNumber(payslipData['697.9']), extractNumber(payslipData['697.9'], 1))
+    const ytdWages = extractNumber(payslipData[499], 3)
+    const ytdFedTaxes = extractNumber(payslipData[499], 1)
+    const ytdCATaxes = extractNumber(payslipData[490], 1)
+    const ytdDisabilityTaxes = extractNumber(payslipData[481], 1)
+    console.log(ytdWages, ytdFedTaxes, ytdCATaxes, ytdDisabilityTaxes)
+    const ytdTaxes = ytdFedTaxes + ytdCATaxes + ytdDisabilityTaxes
+    const taxPercentage = ytdTaxes / ytdWages
+    console.log(ytdTaxes, taxPercentage)
 
-    }
-    console.log(payslipContent)
-    console.log(extractNumber(payslipContent[17].Tj), extractNumber(payslipContent[17].Tj, 2))
+
 }
 export default class PayslipUpload extends React.Component {
     beforeUpload = (file) => {
