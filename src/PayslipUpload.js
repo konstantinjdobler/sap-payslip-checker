@@ -1,5 +1,6 @@
 import React from "react"
-import { Upload, Icon, message } from 'antd';
+import { Upload, Icon, message, Input, Statistic } from 'antd';
+import { CA, FED } from './taxBrackets'
 const { Dragger } = Upload;
 
 function hex2a(hexx) {
@@ -36,7 +37,7 @@ function parseBTETSnippet(snippet) {
             let value = snippet.slice(currentOperatorStart, i).trim()
             if (op === "Tj") {
                 value = value.replace(/<|>/g, "")
-                value = hex2a(value).trim()
+                value = hex2a(value)//.trim()
                 if (snippetData[op]) snippetData[op] = snippetData[op].concat(value)
                 else snippetData[op] = value
 
@@ -59,6 +60,21 @@ function extractPayslipData(BTETSnippets) {
     }
     return data
 }
+function calculateOwedTaxesForBrackets(ytdWages, brackets) {
+    let owedTaxes = 0;
+    for (const bracket of brackets) {
+        if (ytdWages > bracket.start) {
+            const taxableWageInThisBracket = Math.min(ytdWages, bracket.end) - bracket.start
+            owedTaxes += taxableWageInThisBracket * bracket.rate
+
+        }
+    }
+    return owedTaxes
+}
+function calculateOwedTaxes(ytdWages, ytdOtherBenefits) {
+    const disabilityTax = (ytdWages + ytdOtherBenefits) * 0.01
+    return calculateOwedTaxesForBrackets(ytdWages, CA) + calculateOwedTaxesForBrackets(ytdWages, FED) + disabilityTax
+}
 
 function parsePayslip(data) {
     const stream = data.match(/stream([\s\S]*?)endstream/)[1] // first element of match array contains stream and endstream
@@ -67,14 +83,19 @@ function parsePayslip(data) {
     const payslipData = extractPayslipData(BTETSnippets)
     console.log(payslipData)
     //console.log(extractNumber(payslipData['697.9']), extractNumber(payslipData['697.9'], 1))
-    const ytdWages = extractNumber(payslipData[499], 3)
     const ytdFedTaxes = extractNumber(payslipData[499], 1)
     const ytdCATaxes = extractNumber(payslipData[490], 1)
     const ytdDisabilityTaxes = extractNumber(payslipData[481], 1)
-    console.log(ytdWages, ytdFedTaxes, ytdCATaxes, ytdDisabilityTaxes)
-    const ytdTaxes = ytdFedTaxes + ytdCATaxes + ytdDisabilityTaxes
-    const taxPercentage = ytdTaxes / ytdWages
-    console.log(ytdTaxes, taxPercentage)
+    const ytdWages = extractNumber(payslipData[697], 1)
+    const ytdOtherBenefits = extractNumber(payslipData[418], 2)
+    console.log(ytdWages, ytdOtherBenefits, ytdFedTaxes, ytdCATaxes, ytdDisabilityTaxes)
+
+    const ytdPaidTaxes = ytdFedTaxes + ytdCATaxes + ytdDisabilityTaxes
+    const taxPercentage = ytdPaidTaxes / ytdWages
+    console.log(ytdPaidTaxes, taxPercentage)
+    const ytdOwedTaxes = calculateOwedTaxes(ytdWages, ytdOtherBenefits)
+    console.log(ytdOwedTaxes, ytdOwedTaxes / ytdWages)
+    return { ytdPaidTaxes, ytdOtherBenefits, ytdWages, ytdOwedTaxes }
 
 
 }
@@ -84,7 +105,8 @@ export default class PayslipUpload extends React.Component {
         reader.readAsText(file);
         reader.onload = () => {
             message.success(`${file.name} file uploaded successfully.`);
-            parsePayslip(reader.result)
+            const data = parsePayslip(reader.result)
+            this.props.transmitData(data)
 
         }
         return false
@@ -103,8 +125,8 @@ export default class PayslipUpload extends React.Component {
                 </p>
             </Dragger>
 
+
         </>)
 
     }
 }
-
