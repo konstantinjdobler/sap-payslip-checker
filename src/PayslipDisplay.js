@@ -18,20 +18,20 @@ export default class PayslipDisplay extends React.Component {
             <Card title="Earnings" >
                 <Row type="flex" justify="space-around">
                     <Col span={4}>
-                        <Statistic precision={2} title="Wages YTD" value={this.props.ytdWages} prefix="$" />
+                        <Statistic precision={2} title="Total Gross Wages" value={this.props.ytdWages} prefix="$" />
                     </Col>
                     <Col span={4}>
-                        <Statistic precision={2} title="Other Benefits YTD" value={this.props.ytdOtherBenefits} prefix="$" />
+                        <Statistic precision={2} title="Other Benefits" value={this.props.ytdOtherBenefits} prefix="$" />
                     </Col>
                 </Row>
             </Card>
             <Card style={{ marginTop: "40px" }} title="Taxes" >
                 <Row type="flex" justify="space-around">
                     <Col span={4}>
-                        <Statistic precision={2} title="Taxes Withheld YTD" value={this.props.ytdPaidTaxes} prefix="$" />
+                        <Statistic precision={2} title="Taxes Withheld" value={this.props.ytdPaidTaxes} prefix="$" />
                     </Col>
                     <Col span={4}>
-                        <Statistic precision={2} title="Taxes Owed YTD" value={this.props.ytdOwedTaxes} prefix="$" />
+                        <Statistic precision={2} title="Taxes Due" value={this.props.ytdOwedTaxes} prefix="$" />
                     </Col>
                     <Col>
                         <Statistic precision={2} valueStyle={{ color: '#3f8600' }}
