@@ -1,5 +1,9 @@
 name: Deploy To Personal Server
-on: [release]
+
+on:
+  release:
+    types: [published]
+
 
 jobs:
   deploy:
@@ -15,7 +19,7 @@ jobs:
         script: |
           cd
           cd ./projects/npb
-          git checkout origin/master
-          git pull
+          git fetch
+          git reset --hard origin/master
           npm run build
           sudo nginx -s reload
