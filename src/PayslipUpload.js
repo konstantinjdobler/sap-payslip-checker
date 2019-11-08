@@ -1,6 +1,7 @@
 import React from "react"
 import { Upload, Icon, message, Input, Statistic } from 'antd';
 import { CA, FED } from './taxBrackets'
+import { parse } from "url";
 const { Dragger } = Upload;
 
 function hex2a(hexx) {
@@ -75,7 +76,13 @@ function calculateOwedTaxes(ytdWages, ytdOtherBenefits) {
     const disabilityTax = (ytdWages + ytdOtherBenefits) * 0.01
     return calculateOwedTaxesForBrackets(ytdWages, CA) + calculateOwedTaxesForBrackets(ytdWages, FED) + disabilityTax
 }
-
+function extractDate(string, nth) {
+    const regex = /[0-9]{2}\/\d{2}\/\d{4}/g
+    const matches = matchRegex(string, regex)
+    const dateString = matches[nth]
+    const dateNumbers = dateString.split('/').map(str => parseFloat(str))
+    return new Date(dateNumbers[2], dateNumbers[0] - 1, dateNumbers[1])
+}
 function parsePayslip(data) {
     const stream = data.match(/stream([\s\S]*?)endstream/)[1] // first element of match array contains stream and endstream
     let regex = /BT\s*([\s\S]*?)\s*ET/g
@@ -88,14 +95,16 @@ function parsePayslip(data) {
     const ytdDisabilityTaxes = extractNumber(payslipData[481], 1)
     const ytdWages = extractNumber(payslipData[697], 1)
     const ytdOtherBenefits = extractNumber(payslipData[418], 2)
-    console.log(ytdWages, ytdOtherBenefits, ytdFedTaxes, ytdCATaxes, ytdDisabilityTaxes)
+    const periodEnd = extractDate(payslipData[634], 1)
 
     const ytdPaidTaxes = ytdFedTaxes + ytdCATaxes + ytdDisabilityTaxes
-    const taxPercentage = ytdPaidTaxes / ytdWages
-    console.log(ytdPaidTaxes, taxPercentage)
     const ytdOwedTaxes = calculateOwedTaxes(ytdWages, ytdOtherBenefits)
-    console.log(ytdOwedTaxes, ytdOwedTaxes / ytdWages)
-    return { ytdPaidTaxes, ytdOtherBenefits, ytdWages, ytdOwedTaxes }
+
+
+
+    const parsed = { ytdPaidTaxes, ytdOtherBenefits, ytdWages, ytdOwedTaxes, periodEnd }
+    console.log(parsed)
+    return parsed
 
 
 }
@@ -113,20 +122,20 @@ export default class PayslipUpload extends React.Component {
     }
     render() {
 
-        return (<>
+        return (<div style={{ margin: "30px 30px 0px 30px" }}>
             <Dragger beforeUpload={this.beforeUpload}
             >
                 <p className="ant-upload-drag-icon">
                     <Icon type="inbox" />
                 </p>
-                <p className="ant-upload-text">Click or drag file to this area to upload</p>
+                <p className="ant-upload-text">Click or drag a payslip to this area</p>
                 <p className="ant-upload-hint">
-                    Upload your payslip to check it for correct payment
+                    Upload your payslip to check it and gain insights into your payments
                 </p>
             </Dragger>
 
 
-        </>)
+        </div >)
 
     }
 }
