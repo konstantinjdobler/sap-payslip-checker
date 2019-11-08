@@ -19,10 +19,14 @@ export default class PayslipDisplay extends React.Component {
         return countCertainDays([1, 2, 3, 4, 5], new Date(2019, 8, 16), this.props.periodEnd)
     }
 
+    calculateOwedDays() {
+        return this.calculateDueDays() - this.state.vacationDays - this.props.ytdWages / 320
+    }
+
 
     render() {
         return (<div style={{ padding: '30px' }}>
-            <Card title="Earnings" >
+            <Card title="Earnings - From Start of Internship until Uploaded Payslip" >
                 <Row type="flex" justify="space-around">
                     <Col span={4}>
                         <Statistic precision={2} title="Total Gross Wages" value={this.props.ytdWages} prefix="$" />
@@ -32,7 +36,7 @@ export default class PayslipDisplay extends React.Component {
                     </Col>
                 </Row>
             </Card>
-            <Card style={{ marginTop: "40px" }} title="Taxes" >
+            <Card style={{ marginTop: "40px" }} title="Taxes - From Start of Internship until Uploaded Payslip" >
                 <Row type="flex" justify="space-around">
                     <Col span={4}>
                         <Statistic precision={2} title="Taxes Withheld" value={this.props.ytdPaidTaxes} prefix="$" />
@@ -49,20 +53,24 @@ export default class PayslipDisplay extends React.Component {
             <Card style={{ marginTop: "40px" }} title="Day Checker" >
                 <Row type="flex" justify="space-around">
                     <Col span={4}>
-                        Unpaid Vacation Days
-                        <InputNumber style={{ marginTop: "6px" }} defaultValue={0} onChange={value => this.setState({ vacationDays: value })} min={0} />
+                        <span className="ant-statistic-title">Unpaid Vacation Days</span> <br />
+                        <InputNumber
+                            style={{ width: "27%", marginTop: "8px" }} defaultValue={0}
+                            onChange={value => this.setState({ vacationDays: value })} min={0}
+                        />
+                        <span style={{ marginLeft: "8px", color: "rgba(0, 0, 0, 0.85)" }} className="ant-statistic-content-suffix">days</span>
 
                     </Col>
                     <Col span={4}>
-                        <Statistic precision={0} title="Days Paid" value={this.props.ytdWages / 320} suffix="days" />
+                        <Statistic precision={0} title="Days Paid" value={(this.props.ytdWages / 320) || 0} suffix="days" />
                     </Col>
                     <Col span={4}>
-                        <Statistic precision={0} title="Days Due" value={this.calculateDueDays() - this.state.vacationDays} suffix="days" />
+                        <Statistic precision={0} title="Days Due" value={(this.calculateDueDays() - this.state.vacationDays) || 0} suffix="days" />
                     </Col>
                     <Divider style={{ marginBottom: "-10px", fontSize: "75px" }} type="vertical" />
                     <Col >
                         <Statistic valueStyle={{ color: '#3f8600' }}
-                            title="Days SAP Still Owes You" value={this.calculateDueDays() - this.state.vacationDays - this.props.ytdWages / 320} suffix="days" />
+                            title="Days SAP Still Owes You" value={this.calculateOwedDays() || 0} suffix="days" />
                     </Col>
                 </Row>
             </Card>

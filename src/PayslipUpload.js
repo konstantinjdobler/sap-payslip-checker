@@ -128,9 +128,9 @@ export default class PayslipUpload extends React.Component {
                 <p className="ant-upload-drag-icon">
                     <Icon type="inbox" />
                 </p>
-                <p className="ant-upload-text">Click or drag file to this area to upload</p>
+                <p className="ant-upload-text">Click or drag a payslip to this area</p>
                 <p className="ant-upload-hint">
-                    Upload your payslip to check it for correct payment
+                    Upload your payslip to check it and gain insights into your payments
                 </p>
             </Dragger>
 
