@@ -1,8 +1,8 @@
 name: Deploy To Personal Server
 
 on:
-  release:
-    types: [published]
+  push:
+    branches: master
 
 
 jobs:
