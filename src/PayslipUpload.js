@@ -1,7 +1,6 @@
 import React from "react"
-import { Upload, Icon, message, Input, Statistic } from 'antd';
-import { CA, FED } from './taxBrackets'
-import { parse } from "url";
+import { Upload, Icon, message } from 'antd';
+import { CA, FED } from './utils/taxBrackets'
 const { Dragger } = Upload;
 
 function hex2a(hexx) {

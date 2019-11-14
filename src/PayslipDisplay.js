@@ -1,12 +1,19 @@
 import React from "react"
 import { Divider, InputNumber, Card, Row, Col, Statistic } from 'antd';
-function countCertainDays(days, d0, d1) {
-    var ndays = 1 + Math.round((d1 - d0) / (24 * 3600 * 1000));
-    var sum = function (a, b) {
-        return a + Math.floor((ndays + (d0.getDay() + 6 - b) % 7) / 7);
-    };
-    return days.reduce(sum, 0);
+import {publicHolidays} from './utils/publicHolidays'
+
+function getBusinessDatesCount(startDate, endDate, holidays=[]) {
+    let count = 0;
+    let curDate = startDate;
+    while (curDate <= endDate) {
+        let dayOfWeek = curDate.getDay();
+        if(dayOfWeek !== 6 && dayOfWeek !== 0 && !holidays.includes(curDate))
+           count++;
+        curDate.setDate(curDate.getDate() + 1);
+    }
+    return count;
 }
+
 const GOOD_COLOR = '#3f8600'
 const BAD_COLOR = '#ab4e52'
 const OK_COLOR = '#f3ca04'
@@ -19,7 +26,7 @@ export default class PayslipDisplay extends React.Component {
     }
     calculateDueDays() {
         if (!this.props.periodEnd) return
-        return countCertainDays([1, 2, 3, 4, 5], new Date(2019, 8, 16), this.props.periodEnd)
+        return getBusinessDatesCount(new Date(2019, 8, 16), this.props.periodEnd, publicHolidays)
     }
 
     calculateOwedDays() {
