@@ -1,14 +1,14 @@
 import React from "react"
 import { Divider, InputNumber, Card, Row, Col, Statistic } from 'antd';
-import {publicHolidays} from './utils/publicHolidays'
+import { publicHolidays } from './utils/publicHolidays'
 
-function getBusinessDatesCount(startDate, endDate, holidays=[]) {
+function getBusinessDatesCount(startDate, endDate, holidays = []) {
     let count = 0;
     let curDate = startDate;
     while (curDate <= endDate) {
         let dayOfWeek = curDate.getDay();
-        if(dayOfWeek !== 6 && dayOfWeek !== 0 && !holidays.includes(curDate))
-           count++;
+        if (dayOfWeek !== 6 && dayOfWeek !== 0 && !holidays.find(holiday => holiday.getTime() === curDate.getTime()))
+            count++;
         curDate.setDate(curDate.getDate() + 1);
     }
     return count;
