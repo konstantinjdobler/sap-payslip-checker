@@ -3,6 +3,8 @@ import { Upload, Icon, message } from "antd";
 import { CA, FED, TaxBracket } from "./utils/taxBrackets";
 import { PayslipData } from "./@types/public";
 import { ParsedPaylsip, ParsedBTETSnippet } from "./@types/PayslipUpload";
+import { UploadChangeParam } from "antd/lib/upload";
+import { UploadFile } from "antd/lib/upload/interface";
 const { Dragger } = Upload;
 
 function hex2a(hexEncodedString: string) {
@@ -110,10 +112,15 @@ function isValidPayslip(file: string): boolean {
   return true;
 }
 
-interface PayslipUploadProps {
-  transmitData: (data: PayslipData) => void;
-}
-export default class PayslipUpload extends React.Component<PayslipUploadProps> {
+type PayslipUploadProps = {
+  transmitData: (data?: PayslipData) => void;
+  bigText: string;
+  smallText: string;
+};
+
+type PayslipUploadState = { fileList?: UploadFile<any>[] };
+export default class PayslipUpload extends React.Component<PayslipUploadProps, PayslipUploadState> {
+  state: PayslipUploadState = { fileList: undefined };
   beforeUpload = (file: File) => {
     const reader = new FileReader();
     reader.readAsText(file);
@@ -132,15 +139,25 @@ export default class PayslipUpload extends React.Component<PayslipUploadProps> {
     };
     return false;
   };
+  onChange = (info: UploadChangeParam<UploadFile<any>>) => {
+    if (info.fileList.length === 0) this.props.transmitData();
+    this.setState({ fileList: info.fileList.slice(-1) });
+  };
+
   render() {
     return (
-      <div style={{ margin: "30px 30px 0px 30px" }}>
-        <Dragger beforeUpload={this.beforeUpload}>
+      <div style={{ flexGrow: 1, margin: "30px 30px 0px 30px" }}>
+        <Dragger
+          multiple={false}
+          fileList={this.state.fileList}
+          onChange={this.onChange}
+          beforeUpload={this.beforeUpload}
+        >
           <p className="ant-upload-drag-icon">
             <Icon type="inbox" />
           </p>
-          <p className="ant-upload-text">Click or drag a payslip to this area</p>
-          <p className="ant-upload-hint">Upload your payslip to check it and gain insights into your payments</p>
+          <p className="ant-upload-text">{this.props.bigText}</p>
+          <p className="ant-upload-hint">{this.props.smallText}</p>
         </Dragger>
       </div>
     );

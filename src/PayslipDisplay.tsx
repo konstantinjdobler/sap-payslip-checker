@@ -18,8 +18,12 @@ function getBusinessDatesCount(startDate: Date, endDate: Date, holidays: Date[] 
 const GOOD_COLOR = "#3f8600";
 const BAD_COLOR = "#ab4e52";
 const OK_COLOR = "#f3ca04";
+const START_INTERNSHIP_STRING = "Start of Internship";
+const START_2020_STRING = "Begin of 2020";
+const END_2019_STRING = "End of 2019";
+const LAST_OF_2020_STRING = "Uploaded Payslip of 2020";
 type PayslipDisplayState = { vacationDays: number };
-type PayslipDisplayProps = { payslipData?: PayslipData };
+type PayslipDisplayProps = { payslipData?: PayslipData; data2019: boolean; data2020: boolean };
 export default class PayslipDisplay extends React.Component<PayslipDisplayProps, PayslipDisplayState> {
   state: PayslipDisplayState = {
     vacationDays: 0,
@@ -43,9 +47,12 @@ export default class PayslipDisplay extends React.Component<PayslipDisplayProps,
   }
   render() {
     if (!this.props.payslipData) return <div />;
+    const startString = this.props.data2019 ? START_INTERNSHIP_STRING : START_2020_STRING;
+    const endString = this.props.data2020 ? LAST_OF_2020_STRING : END_2019_STRING;
+    const periodDescription = ` - From ${startString} until ${endString}`;
     return (
       <div style={{ padding: "30px" }}>
-        <Card title="Earnings - From Start of Internship until Uploaded Payslip">
+        <Card title={"Earnings" + periodDescription}>
           <Row type="flex" justify="space-around">
             <Col span={4}>
               <Statistic
@@ -65,7 +72,7 @@ export default class PayslipDisplay extends React.Component<PayslipDisplayProps,
             </Col>
           </Row>
         </Card>
-        <Card style={{ marginTop: "40px" }} title="Taxes - From Start of Internship until Uploaded Payslip">
+        <Card style={{ marginTop: "40px" }} title={"Taxes" + periodDescription}>
           <Row type="flex" justify="space-around">
             <Col span={4}>
               <Statistic
@@ -98,7 +105,7 @@ export default class PayslipDisplay extends React.Component<PayslipDisplayProps,
             </Col>
           </Row>
         </Card>
-        <Card style={{ marginTop: "40px" }} title="Day Checker - From Start of Internship until Uploaded Payslip">
+        <Card style={{ marginTop: "40px" }} title={"Day Checker" + periodDescription}>
           <Row type="flex" justify="space-around">
             <Col span={4}>
               <span className="ant-statistic-title">Unpaid Vacation Days</span> <br />
