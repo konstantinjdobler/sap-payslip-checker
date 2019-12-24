@@ -1,10 +1,11 @@
 import React from "react";
-import { Upload, Icon, message } from "antd";
+import { Upload, Icon, message, Checkbox } from "antd";
 import { CA, FED, TaxBracket } from "./utils/taxBrackets";
 import { PayslipData } from "./@types/public";
 import { ParsedPaylsip, ParsedBTETSnippet } from "./@types/PayslipUpload";
 import { UploadChangeParam } from "antd/lib/upload";
 import { UploadFile } from "antd/lib/upload/interface";
+import { CheckboxChangeEvent } from "antd/lib/checkbox";
 const { Dragger } = Upload;
 
 function hex2a(hexEncodedString: string) {
@@ -114,13 +115,12 @@ function isValidPayslip(file: string): boolean {
 
 type PayslipUploadProps = {
   transmitData: (data?: PayslipData) => void;
-  bigText: string;
-  smallText: string;
+  is2019?: boolean;
 };
 
-type PayslipUploadState = { fileList?: UploadFile<any>[] };
+type PayslipUploadState = { fileList: UploadFile<any>[]; usingCache: boolean };
 export default class PayslipUpload extends React.Component<PayslipUploadProps, PayslipUploadState> {
-  state: PayslipUploadState = { fileList: undefined };
+  state: PayslipUploadState = { fileList: [], usingCache: false };
   beforeUpload = (file: File) => {
     const reader = new FileReader();
     reader.readAsText(file);
@@ -129,12 +129,22 @@ export default class PayslipUpload extends React.Component<PayslipUploadProps, P
         message.error(`Error while parsing ${file.name}.`);
         return false;
       }
-      message.success(`${file.name} file uploaded successfully.`);
       if (!isValidPayslip(reader.result)) {
         message.error(`Invalid payslip: ${file.name}.`);
         return false;
       }
       const data = extractPayslipData(reader.result);
+      if (this.props.is2019) {
+        if (data.periodEnd.getMonth() !== 11) {
+          message.error("Provided payslip is not last of 2019!");
+          this.setState({ fileList: [] });
+          return false;
+        }
+        window.localStorage.setItem("data2019", JSON.stringify(data));
+        this.setState({ usingCache: false });
+      }
+      message.success(`${file.name} file uploaded successfully.`);
+
       this.props.transmitData(data);
     };
     return false;
@@ -144,9 +154,39 @@ export default class PayslipUpload extends React.Component<PayslipUploadProps, P
     this.setState({ fileList: info.fileList.slice(-1) });
   };
 
+  bigText = () => {
+    if (this.props.is2019) {
+      if (this.state.usingCache) return "Using cached last payslip of 2019!";
+      if (this.fileIsUploaded()) return "Thank you for uploading your last payslip from 2019!";
+      return "Upload your last payslip of 2019!";
+    }
+    if (this.fileIsUploaded()) return "Thank you for uploading your latest payslip from 2020!";
+    return "Upload your latest payslip of 2020!";
+  };
+
+  smallText = () => {
+    if (this.props.is2019) {
+      if (this.state.usingCache) return "You just saved 30 seconds by using the cache.";
+      return "The data will be securely stored on your computer, so you don't have to upload it again next time.";
+    }
+    if (this.fileIsUploaded()) return "Have fun with your analysis!";
+    return "This will provide you with insights over your whole internship.";
+  };
+
+  fileIsUploaded = () => this.state.usingCache || this.state.fileList.length === 1;
+  componentDidMount() {
+    if (!this.props.is2019) return;
+    const cachedData = window.localStorage.getItem("data2019");
+    if (cachedData) {
+      const parsedCachedData: PayslipData = JSON.parse(cachedData);
+      parsedCachedData.periodEnd = new Date(parsedCachedData.periodEnd);
+      this.props.transmitData(parsedCachedData);
+      this.setState({ usingCache: true });
+    }
+  }
   render() {
     return (
-      <div style={{ flexGrow: 1, margin: "30px 30px 0px 30px" }}>
+      <div style={{ width: "50%", height: "100%", margin: "30px 30px 0px 30px" }}>
         <Dragger
           multiple={false}
           fileList={this.state.fileList}
@@ -154,10 +194,10 @@ export default class PayslipUpload extends React.Component<PayslipUploadProps, P
           beforeUpload={this.beforeUpload}
         >
           <p className="ant-upload-drag-icon">
-            <Icon type="inbox" />
+            <Icon type={this.fileIsUploaded() ? "check-circle" : "inbox"} />
           </p>
-          <p className="ant-upload-text">{this.props.bigText}</p>
-          <p className="ant-upload-hint">{this.props.smallText}</p>
+          <p className="ant-upload-text">{this.bigText()}</p>
+          <p className="ant-upload-hint">{this.smallText()}</p>
         </Dragger>
       </div>
     );

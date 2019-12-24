@@ -26,16 +26,8 @@ export default class App extends React.Component<{}, AppState> {
     return (
       <>
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "center" }}>
-          <PayslipUpload
-            bigText="Upload your last payslip from 2019."
-            smallText="This will give you insights covering your whole internship."
-            transmitData={data2019 => this.setState({ data2019 })}
-          />
-          <PayslipUpload
-            bigText="Upload your latest payslip from 2020."
-            smallText="This will give you insights covering your whole internship."
-            transmitData={data2020 => this.setState({ data2020 })}
-          />
+          <PayslipUpload is2019 transmitData={data2019 => this.setState({ data2019 })} />
+          <PayslipUpload transmitData={data2020 => this.setState({ data2020 })} />
         </div>
 
         <PayslipDisplay
