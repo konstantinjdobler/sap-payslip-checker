@@ -1,0 +1,37 @@
+name: Deploy To Personal Server
+
+on:
+  push:
+    branches: master
+
+jobs:
+  deploy:
+    name: Deploy To Server
+    runs-on: ubuntu-latest
+    steps:
+      - name: executing remote ssh commands using password
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.PERSONAL_SERVER_HOST }}
+          username: ${{ secrets.PERSONAL_SERVER_USER }}
+          password: ${{ secrets.PERSONAL_SERVER_PASSWORD }}
+          timeout: 15m
+          command_timeout: 15m
+          script: |
+            cd
+            cd ./projects/npb
+            echo "Building for commit with SHA: ${{github.sha}}"
+
+            git fetch
+
+            echo "Checking out commit with SHA: ${{github.sha}}"
+            git checkout -f ${{github.sha}}
+
+            echo "Updating dependencies"
+            npm install
+
+            echo "Running build"
+            npm run build
+
+            echo "Reloading nginx"
+            sudo nginx -s reload
