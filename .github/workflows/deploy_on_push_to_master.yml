@@ -15,8 +15,8 @@ jobs:
           host: ${{ secrets.PERSONAL_SERVER_HOST }}
           username: ${{ secrets.PERSONAL_SERVER_USER }}
           password: ${{ secrets.PERSONAL_SERVER_PASSWORD }}
-          timeout: 45m
-          command_timeout: 45m
+          timeout: 20m
+          command_timeout: 15m
           script: |
             cd
             cd ./projects/npb
