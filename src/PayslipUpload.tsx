@@ -169,7 +169,7 @@ export default class PayslipUpload extends React.Component<PayslipUploadProps, P
 
   smallText = () => {
     if (this.props.is2019) {
-      if (this.state.usingCache) return "You just saved 30 seconds by using the cache.";
+      if (this.state.usingCache) return "You just saved yourself a minute of your life by using the cache.";
       return "The data will be securely stored on your computer, so you don't have to upload it again next time.";
     }
     if (this.fileIsUploaded()) return "Have fun with your analysis!";

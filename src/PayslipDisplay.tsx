@@ -1,7 +1,8 @@
 import React from "react";
-import { Divider, InputNumber, Card, Row, Col, Statistic } from "antd";
+import { Divider, InputNumber, Card, Row, Col, Statistic, DatePicker } from "antd";
 import { publicHolidays } from "./utils/publicHolidays";
 import { PayslipData } from "./@types/public";
+import moment from "moment";
 
 function getBusinessDatesCount(startDate: Date, endDate: Date, holidays: Date[] = []) {
   let count = 0;
@@ -170,6 +171,19 @@ export default class PayslipDisplay extends React.Component<PayslipDisplayProps,
               />
             </Col>
           </Row>
+        </Card>
+        <Card style={{ maxWidth: "fit-content", margin: "40px auto 0px" }} title="Internship Start Date">
+          <DatePicker
+            defaultValue={moment(new Date(2019, 8, 16))}
+            allowClear={false}
+            showToday={false}
+            onChange={date => {
+              // allowClear = false protects against date === null
+              const storeableValue = date!.format("YYYY/MM/DD");
+              window.localStorage.setItem("startDate", storeableValue);
+              this.forceUpdate();
+            }}
+          ></DatePicker>
         </Card>
       </div>
     );
