@@ -31,12 +31,18 @@ export default class PayslipDisplay extends React.Component<PayslipDisplayProps,
 
   calculateDueDays() {
     if (!this.props.payslipData) return 0;
-    return getBusinessDatesCount(new Date(2019, 8, 16), this.props.payslipData.periodEnd, publicHolidays);
+    const storedStartDate = window.localStorage.getItem("startDate");
+    const startDate = storedStartDate ? new Date(storedStartDate) : new Date(2019, 8, 16); // Newport Beach start date as default
+    return getBusinessDatesCount(startDate, this.props.payslipData.periodEnd, publicHolidays);
   }
 
   calculateOwedDays() {
     if (!this.props.payslipData) return 0;
-    return this.calculateDueDays() - this.state.vacationDays - this.props.payslipData.ytdWages / 320;
+    return (
+      this.calculateDueDays() -
+      this.state.vacationDays -
+      (this.props.payslipData.ytdWages - this.props.payslipData.ytdNonWagePay) / 320
+    );
   }
 
   valueColor(value: number, biggerIsBetter = true) {

@@ -16,6 +16,7 @@ function mergePayslipData(data2019: PayslipData | undefined, data2020: PayslipDa
     ytdOwedTaxes: data2019.ytdOwedTaxes + data2020.ytdOwedTaxes,
     ytdPaidTaxes: data2019.ytdPaidTaxes + data2020.ytdPaidTaxes,
     ytdWages: data2019.ytdWages + data2020.ytdWages,
+    ytdNonWagePay: data2019.ytdNonWagePay + data2020.ytdNonWagePay,
     periodEnd: data2020.periodEnd,
   };
   return mergedData;

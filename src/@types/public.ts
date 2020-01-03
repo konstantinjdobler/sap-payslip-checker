@@ -3,5 +3,6 @@ export type PayslipData = {
   ytdOtherBenefits: number;
   ytdWages: number;
   ytdOwedTaxes: number;
+  ytdNonWagePay: number;
   periodEnd: Date;
 };
