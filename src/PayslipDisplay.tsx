@@ -45,9 +45,9 @@ export default class PayslipDisplay extends React.Component<PayslipDisplayProps,
     );
   }
 
-  valueColor(value: number, biggerIsBetter = true) {
+  valueColor(value: number, biggerIsBetter = true, zeroIsGood = false) {
     if (isNaN(value)) return;
-    if (value === 0) return OK_COLOR;
+    if (value === 0) return zeroIsGood ? GOOD_COLOR : OK_COLOR;
     if (biggerIsBetter) return value > 0 ? GOOD_COLOR : BAD_COLOR;
     else return value < 0 ? GOOD_COLOR : BAD_COLOR;
   }
@@ -64,14 +64,22 @@ export default class PayslipDisplay extends React.Component<PayslipDisplayProps,
               <Statistic
                 precision={2}
                 title="Total Gross Wages Paid To You"
-                value={this.props.payslipData.ytdWages}
+                value={this.props.payslipData.ytdWages - this.props.payslipData.ytdNonWagePay}
                 prefix="$"
               />
             </Col>
             <Col span={4}>
               <Statistic
                 precision={2}
-                title="Other Benefits Paid To You"
+                title="Appreciations (Gross Amount)"
+                value={this.props.payslipData.ytdNonWagePay}
+                prefix="$"
+              />
+            </Col>
+            <Col span={4}>
+              <Statistic
+                precision={2}
+                title="GTLI Benefits (Group Term Life Insurance)"
                 value={this.props.payslipData.ytdOtherBenefits}
                 prefix="$"
               />
@@ -147,7 +155,7 @@ export default class PayslipDisplay extends React.Component<PayslipDisplayProps,
             <Divider style={{ marginBottom: "-10px", fontSize: "75px" }} type="vertical" />
             <Col>
               <Statistic
-                valueStyle={{ color: this.valueColor(this.calculateOwedDays(), false) }}
+                valueStyle={{ color: this.valueColor(this.calculateOwedDays(), false, true) }}
                 title="Days SAP Still Owes You"
                 value={this.calculateOwedDays() || 0}
                 suffix="days"
@@ -155,7 +163,7 @@ export default class PayslipDisplay extends React.Component<PayslipDisplayProps,
             </Col>
             <Col>
               <Statistic
-                valueStyle={{ color: this.valueColor(this.calculateOwedDays(), false) }}
+                valueStyle={{ color: this.valueColor(this.calculateOwedDays(), false, true) }}
                 title="Money SAP Still Owes You"
                 value={this.calculateOwedDays() * 320 || 0}
                 prefix="$"
