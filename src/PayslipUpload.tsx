@@ -146,6 +146,13 @@ export default class PayslipUpload extends React.Component<PayslipUploadProps, P
         window.localStorage.setItem("data2019", JSON.stringify(data));
         this.setState({ usingCache: false });
       }
+      if (!this.props.is2019) {
+        if (data.periodEnd.getFullYear() !== 2020) {
+          message.error("Provided payslip is not of 2020!");
+          this.setState({ fileList: [] });
+          return false;
+        }
+      }
       message.success(`${file.name} file uploaded successfully.`);
 
       this.props.transmitData(data);
