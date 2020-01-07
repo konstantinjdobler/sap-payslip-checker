@@ -30,11 +30,14 @@ export default class PayslipDisplay extends React.Component<PayslipDisplayProps,
     vacationDays: 0,
   };
 
-  calculateDueDays() {
-    if (!this.props.payslipData) return 0;
+  getStartDate() {
     const storedStartDate = window.localStorage.getItem("startDate");
     const startDate = storedStartDate ? new Date(storedStartDate) : new Date(2019, 8, 16); // Newport Beach start date as default
-    return getBusinessDatesCount(startDate, this.props.payslipData.periodEnd, publicHolidays);
+    return startDate;
+  }
+  calculateDueDays() {
+    if (!this.props.payslipData) return 0;
+    return getBusinessDatesCount(this.getStartDate(), this.props.payslipData.periodEnd, publicHolidays);
   }
 
   calculateOwedDays() {
@@ -174,7 +177,7 @@ export default class PayslipDisplay extends React.Component<PayslipDisplayProps,
         </Card>
         <Card style={{ maxWidth: "fit-content", margin: "40px auto 0px" }} title="Internship Start Date">
           <DatePicker
-            defaultValue={moment(new Date(2019, 8, 16))}
+            defaultValue={moment(this.getStartDate())}
             allowClear={false}
             showToday={false}
             onChange={date => {
