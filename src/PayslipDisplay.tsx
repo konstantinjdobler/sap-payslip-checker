@@ -27,7 +27,7 @@ type PayslipDisplayState = { vacationDays: number };
 type PayslipDisplayProps = { payslipData?: PayslipData; data2019: boolean; data2020: boolean };
 export default class PayslipDisplay extends React.Component<PayslipDisplayProps, PayslipDisplayState> {
   state: PayslipDisplayState = {
-    vacationDays: 0,
+    vacationDays: parseFloat(window.localStorage.getItem("vacationDays") || "0"),
   };
 
   getStartDate() {
@@ -129,8 +129,12 @@ export default class PayslipDisplay extends React.Component<PayslipDisplayProps,
               <span className="ant-statistic-title">Unpaid Vacation Days</span> <br />
               <InputNumber
                 style={{ width: "27%", marginTop: "8px" }}
-                defaultValue={0}
-                onChange={value => this.setState({ vacationDays: value as number })}
+                value={this.state.vacationDays}
+                onChange={value => {
+                  if (typeof value !== "number") return;
+                  window.localStorage.setItem("vacationDays", value.toString());
+                  this.setState({ vacationDays: value });
+                }}
                 min={0}
               />
               <span
