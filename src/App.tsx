@@ -32,8 +32,8 @@ export default class App extends React.Component<{}, AppState> {
         </div>
 
         <PayslipDisplay
-          data2020={!!this.state.data2020}
-          data2019={!!this.state.data2019}
+          data2020={this.state.data2020}
+          data2019={this.state.data2019}
           payslipData={mergePayslipData(this.state.data2019, this.state.data2020)}
         />
       </>

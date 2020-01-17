@@ -24,7 +24,7 @@ const START_2020_STRING = "Begin of 2020";
 const END_2019_STRING = "End of 2019";
 const LAST_OF_2020_STRING = "Uploaded Payslip of 2020";
 type PayslipDisplayState = { vacationDays: number };
-type PayslipDisplayProps = { payslipData?: PayslipData; data2019: boolean; data2020: boolean };
+type PayslipDisplayProps = { payslipData?: PayslipData; data2019?: PayslipData; data2020?: PayslipData };
 export default class PayslipDisplay extends React.Component<PayslipDisplayProps, PayslipDisplayState> {
   state: PayslipDisplayState = {
     vacationDays: parseFloat(window.localStorage.getItem("vacationDays") || "0"),
@@ -34,6 +34,14 @@ export default class PayslipDisplay extends React.Component<PayslipDisplayProps,
     const storedStartDate = window.localStorage.getItem("startDate");
     const startDate = storedStartDate ? new Date(storedStartDate) : new Date(2019, 8, 16); // Newport Beach start date as default
     return startDate;
+  }
+
+  getEndDate() {
+    if (this.props.data2020) {
+      return this.props.data2020.periodEnd;
+    } else {
+      return this.props.data2019!.periodEnd;
+    }
   }
   calculateDueDays() {
     if (!this.props.payslipData) return 0;
@@ -109,18 +117,32 @@ export default class PayslipDisplay extends React.Component<PayslipDisplayProps,
               />
             </Col>
             <Divider style={{ marginBottom: "-10px", fontSize: "75px" }} type="vertical" />
-
-            <Col>
-              <Statistic
-                precision={2}
-                valueStyle={{
-                  color: this.valueColor(this.props.payslipData.ytdPaidTaxes - this.props.payslipData.ytdOwedTaxes),
-                }}
-                title="Your Tax Refund"
-                value={this.props.payslipData.ytdPaidTaxes - this.props.payslipData.ytdOwedTaxes || 0}
-                prefix="$"
-              />
-            </Col>
+            {this.props.data2019 && (
+              <Col>
+                <Statistic
+                  precision={2}
+                  valueStyle={{
+                    color: this.valueColor(this.props.payslipData.ytdPaidTaxes - this.props.payslipData.ytdOwedTaxes),
+                  }}
+                  title="Your Tax Refund of 2019"
+                  value={this.props.data2019.ytdPaidTaxes - this.props.data2019.ytdOwedTaxes}
+                  prefix="$"
+                />
+              </Col>
+            )}
+            {this.props.data2020 && (
+              <Col>
+                <Statistic
+                  precision={2}
+                  valueStyle={{
+                    color: this.valueColor(this.props.payslipData.ytdPaidTaxes - this.props.payslipData.ytdOwedTaxes),
+                  }}
+                  title="Your Tax Refund of 2020"
+                  value={this.props.data2020.ytdPaidTaxes - this.props.data2020.ytdOwedTaxes}
+                  prefix="$"
+                />
+              </Col>
+            )}
           </Row>
         </Card>
         <Card style={{ marginTop: "40px" }} title={"Day Checker" + periodDescription}>
