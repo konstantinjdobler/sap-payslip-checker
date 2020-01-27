@@ -20,6 +20,7 @@ jobs:
           script: |
             cd
             cd ./projects/npb
+            export TSC_WATCHFILE=UseFsEventsWithFallbackDynamicPolling
             echo "Building for commit with SHA: ${{github.sha}}"
 
             git fetch
