@@ -28,6 +28,9 @@ export default class PayslipDisplay extends React.Component<PayslipDisplayProps,
   };
 
   getStartDate() {
+    if (!this.props.data2019) {
+      return new Date(2020, 0, 1);
+    }
     const storedStartDate = window.localStorage.getItem("startDate");
     const startDate = storedStartDate ? new Date(storedStartDate) : new Date(2019, 8, 16); // Newport Beach start date as default
     return startDate;
@@ -42,7 +45,9 @@ export default class PayslipDisplay extends React.Component<PayslipDisplayProps,
   }
   calculateDueDays() {
     if (!this.props.payslipData) return 0;
-    return getBusinessDatesCount(this.getStartDate(), this.props.payslipData.periodEnd, publicHolidays);
+    // account for partial payslip form last year
+    const adjustment = this.props.data2019 ? 0 : 4;
+    return getBusinessDatesCount(this.getStartDate(), this.props.payslipData.periodEnd, publicHolidays) + adjustment;
   }
 
   calculateOwedDays() {
@@ -61,12 +66,15 @@ export default class PayslipDisplay extends React.Component<PayslipDisplayProps,
     else return value < 0 ? GOOD_COLOR : BAD_COLOR;
   }
 
-  getPeriodDescription(payslipData: PayslipData, coverWholeInternship = false) {
+  getPeriodDescription(payslipData: PayslipData, startIn2019 = false) {
     const options = { year: "numeric", month: "long", day: "numeric" };
-    const start =
-      payslipData.periodEnd.getFullYear() === 2019 || coverWholeInternship
-        ? this.getStartDate().toLocaleDateString("en-US", options)
-        : new Date(2020, 0, 1).toLocaleDateString("en-US", options) + " (+ partial payslip from last year)";
+    const startIs2020 = this.getStartDate().toDateString() === new Date(2020, 0, 1).toDateString();
+    let start: string;
+    if (!startIs2020 && (payslipData.periodEnd.getFullYear() === 2019 || startIn2019)) {
+      start = this.getStartDate().toLocaleDateString("en-US", options);
+    } else {
+      start = new Date(2020, 0, 1).toLocaleDateString("en-US", options) + " (+ partial payslip from last year)";
+    }
     const end = payslipData.periodEnd.toLocaleDateString("en-US", options);
     return `From ${start} until ${end}`;
   }
@@ -136,9 +144,9 @@ export default class PayslipDisplay extends React.Component<PayslipDisplayProps,
       <Card style={{ marginTop: "40px" }} title={"Day Checker - " + this.getPeriodDescription(payslipData, true)}>
         <Row type="flex" justify="space-around">
           <Col span={4}>
-            <span className="ant-statistic-title">Unpaid Vacation Days</span> <br />
+            <span className="ant-statistic-title">Unpaid Vacation Days (Leave Request)</span> <br />
             <InputNumber
-              style={{ width: "27%", marginTop: "8px" }}
+              style={{ maxWidth: "fit-content", marginTop: "8px" }}
               value={this.state.vacationDays}
               onChange={value => {
                 if (typeof value !== "number") return;
